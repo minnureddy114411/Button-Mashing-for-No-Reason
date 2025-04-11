@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Button Mashing for No Reason</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #fff3e0;
+      text-align: center;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    button {
+      width: 150px;
+      height: 150px;
+      background-color: #ff0000;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    #gunContainer {
+      margin-top: 30px;
+      position: relative;
+      height: 60px;
+    }
+
+    #gun {
+      font-size: 2.5rem;
+    }
+
+    .bullet {
+      position: absolute;
+      left: 50%;
+      bottom: 60px;
+      width: 10px;
+      height: 20px;
+      background: yellow;
+      border-radius: 3px;
+      animation: shoot 0.6s linear forwards;
+    }
+
+    @keyframes shoot {
+      0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-50%) translateY(-500px);
+        opacity: 0;
+      }
+    }
+
+    .floater {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: floatUp 1s ease-out forwards;
+      color: #444;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+    }
+
+    .achievement {
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="title">Button Mashing for No Reason</h1>
+
+    <button id="mashButton">MASH!</button>
+
+    <div id="gunContainer">
+      <div id="gun">🔫</div>
+    </div>
+
+    <p id="counter">Clicks: 0</p>
+    <p id="goal">Goal: Click 10 times to unlock... a potato?</p>
+    <div id="achievements"></div>
+    <div id="floaters-container"></div>
+
+    <audio id="boop" src="https://www.myinstants.com/media/sounds/mario-coin.mp3" preload="auto"></audio>
+  </div>
+
+  <script>
+    const button = document.getElementById('mashButton');
+    const counterDisplay = document.getElementById('counter');
+    const goalDisplay = document.getElementById('goal');
+    const boopSound = document.getElementById('boop');
+    const floatersContainer = document.getElementById('floaters-container');
+    const achievementsDiv = document.getElementById('achievements');
+    const gunContainer = document.getElementById('gunContainer');
+
+    let count = 0;
+    let unlocked = new Set();
+
+    const goals = [
+      { clicks: 10, message: "Click 10 times to unlock... a potato?", emoji: "🥔" },
+      { clicks: 25, message: "Click 25 times to reveal the secret of life!", emoji: "🧠" },
+      { clicks: 50, message: "Click 50 times to summon a rubber duck.", emoji: "🦆" },
+      { clicks: 100, message: "Click 100 times to break the matrix.", emoji: "🕶️" },
+      { clicks: 200, message: "Click 200 times to ascend to button heaven.", emoji: "😇" },
+      { clicks: 500, message: "Click 500 times. Why are you still doing this?", emoji: "🤯" },
+      { clicks: 1000, message: "Click 1000 times to win... respect?", emoji: "👑" }
+    ];
+
+    function updateGoal() {
+      for (let i = goals.length - 1; i >= 0; i--) {
+        if (count >= goals[i].clicks) {
+          goalDisplay.textContent = "Goal: " + goals[i].message;
+          dropEmoji(goals[i].emoji);
+          break;
+        }
+      }
+    }
+
+    function dropEmoji(emoji) {
+      if (!emoji) return;
+      const emojiEl = document.createElement('div');
+      emojiEl.textContent = emoji;
+      emojiEl.style.position = 'absolute';
+      emojiEl.style.top = '-50px';
+      emojiEl.style.left = `${Math.random() * 90 + 5}%`;
+      emojiEl.style.fontSize = '3rem';
+      emojiEl.style.animation = 'emojiFall 1.5s ease forwards';
+      document.body.appendChild(emojiEl);
+
+      setTimeout(() => {
+        document.body.removeChild(emojiEl);
+      }, 1500);
+    }
+
+    function updateBackground() {
+      const backgrounds = [
+        { threshold: 50, color: "#ffebee" },
+        { threshold: 100, color: "#e8f5e9" },
+        { threshold: 200, color: "#e3f2fd" },
+        { threshold: 500, color: "#f3e5f5" },
+        { threshold: 1000, color: "#fffde7" }
+      ];
+
+      for (let i = backgrounds.length - 1; i >= 0; i--) {
+        if (count >= backgrounds[i].threshold) {
+          document.body.style.background = backgrounds[i].color;
+          button.style.backgroundColor = "#ff0000";
+          break;
+        }
+      }
+    }
+
+    function showFloater() {
+      const floater = document.createElement('div');
+      floater.className = 'floater';
+      floater.textContent = '+1';
+      floater.style.left = `${Math.random() * 80 + 10}%`;
+      floater.style.top = `${Math.random() * 20 + 50}px`;
+      floatersContainer.appendChild(floater);
+
+      setTimeout(() => {
+        floatersContainer.removeChild(floater);
+      }, 1000);
+    }
+
+    function unlockCosmetics() {
+      const cosmetics = [
+        { clicks: 50, content: "🎉 You unlocked a party hat!" },
+        { clicks: 100, content: "🦆 Rubber duck mode unlocked!" },
+        { clicks: 250, content: "🌈 Background sparkles unlocked!" },
+        { clicks: 500, content: "👑 You are the Mash King/Queen!" }
+      ];
+
+      cosmetics.forEach(item => {
+        if (count >= item.clicks && !unlocked.has(item.clicks)) {
+          unlocked.add(item.clicks);
+          const div = document.createElement('div');
+          div.className = 'achievement';
+          div.textContent = item.content;
+          achievementsDiv.appendChild(div);
+        }
+      });
+    }
+
+    function shootBullet() {
+      const bullet = document.createElement('div');
+      bullet.className = 'bullet';
+      gunContainer.appendChild(bullet);
+
+      setTimeout(() => {
+        bullet.remove();
+      }, 600);
+    }
+
+    button.addEventListener('click', () => {
+      count++;
+      counterDisplay.textContent = `Clicks: ${count}`;
+      boopSound.currentTime = 0;
+      boopSound.play();
+      updateGoal();
+      updateBackground();
+      showFloater();
+      unlockCosmetics();
+      shootBullet();
+    });
+  </script>
+</body>
+</html>
